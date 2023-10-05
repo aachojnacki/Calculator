@@ -8,21 +8,34 @@
 import SwiftUI
 
 struct CalculatorButton: View {
+    @ObservedObject var viewModel: CalculatorButtonViewModel
+    let buttonWidth: CGFloat
     var body: some View {
-        ZStack {
-            Circle()
-                .foregroundStyle(.yellow)
-            Text("1")
-                .font(.system(size: 50))
-                .foregroundStyle(.foreground)
-                .lineLimit(1)
+        Text(viewModel.text)
+            .font(.system(size: 30))
+            .foregroundStyle(.white)
+            .frame(width: buttonWidth, height: buttonWidth)
+            .background(content: { Circle()
+                .foregroundStyle(backgroundColor)})
+    }
+    
+    var backgroundColor: Color {
+        switch viewModel.mode {
+        case .operation, .clear:
+            return .cyan
+        case .symbol:
+            return .yellow
+        case .result:
+            return .yellow
+        case .empty:
+            return .clear
         }
     }
 }
 
 struct CalculatorButton_Previews: PreviewProvider {
     static var previews: some View {
-        CalculatorButton()
+        CalculatorButton(viewModel: CalculatorButtonViewModel(mode: .clear), buttonWidth: 80)
             .previewLayout(.sizeThatFits)
     }
 }

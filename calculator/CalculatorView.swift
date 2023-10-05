@@ -10,32 +10,21 @@ import SwiftUI
 struct CalculatorView: View {
     let padding: CGFloat = 10
     let spacing: CGFloat = 10
-    let buttons = [
-        ["C", "sin", "cos", "/"],
-        ["7", "8", "9", "*"],
-        ["4", "5", "6", "-"],
-        ["1", "2", "3", "+"],
-        ["0", ".", "=", "₿"]
-    ]
+    @StateObject var viewModel: CalculatorViewModel
     var body: some View {
         GeometryReader { geometry in
             VStack {
                 Spacer()
                 HStack {
                     Spacer()
-                    Text("1337")
+                    Text(viewModel.displayText)
                         .font(.system(size: 50))
                 }
                 VStack(spacing: spacing) {
-                    ForEach(buttons, id: \.self) { row in
+                    ForEach(viewModel.buttonsMatrix, id: \.self) { row in
                         HStack(spacing: spacing) {
-                            ForEach(row, id: \.self) { button in
-                                Text(button)
-                                    .font(.system(size: 30))
-                                    .foregroundStyle(.white)
-                                    .frame(width: buttonSize(forGeometrySize: geometry.size), height: buttonSize(forGeometrySize: geometry.size))
-                                    .background(content: { Circle()
-                                        .foregroundStyle(.cyan)})
+                            ForEach(row) { buttonViewModel in
+                                CalculatorButton(viewModel: buttonViewModel, buttonWidth: buttonSize(forGeometrySize: geometry.size))
                             }
                         }
                     }
@@ -53,5 +42,5 @@ struct CalculatorView: View {
 }
 
 #Preview {
-    CalculatorView()
+    CalculatorView(viewModel: CalculatorViewModel())
 }
