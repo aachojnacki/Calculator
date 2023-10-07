@@ -17,6 +17,9 @@ struct CalculatorButton: View {
             .frame(width: buttonWidth, height: buttonWidth)
             .background(content: { Circle()
                 .foregroundStyle(backgroundColor)})
+            .onTapGesture {
+                viewModel.buttonPressed()
+            }
     }
     
     var backgroundColor: Color {

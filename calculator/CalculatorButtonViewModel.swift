@@ -6,18 +6,11 @@
 //
 
 import CalculatorOperations
+import Combine
 import Foundation
 
-class CalculatorButtonViewModel: ObservableObject, Identifiable, Hashable {
-    static func == (lhs: CalculatorButtonViewModel, rhs: CalculatorButtonViewModel) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    
-    enum Mode {
+class CalculatorButtonViewModel: ObservableObject, Identifiable {
+    enum Action {
         case operation(CalculatorOperation)
         case clear
         case symbol(Character)
@@ -26,8 +19,11 @@ class CalculatorButtonViewModel: ObservableObject, Identifiable, Hashable {
     }
     
     @Published var text: String
-    let mode: Mode
-    init(mode: Mode) {
+    let mode: Action
+    let buttonAction = PassthroughSubject<Action, Never>()
+    var cancellables = Set<AnyCancellable>()
+    
+    init(mode: Action) {
         self.mode = mode
         switch mode {
         case .operation(let operation):
@@ -43,4 +39,22 @@ class CalculatorButtonViewModel: ObservableObject, Identifiable, Hashable {
         }
     }
     
+    func buttonPressed() {
+        buttonAction.send(mode)
+    }
+}
+
+// SwiftUI requires Hashable protocol to be implemented in order to use ForEach on Arrays
+extension Array: Identifiable where Element: Hashable {
+    public var id: Self { self }
+}
+
+extension CalculatorButtonViewModel: Hashable {
+    static func == (lhs: CalculatorButtonViewModel, rhs: CalculatorButtonViewModel) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
