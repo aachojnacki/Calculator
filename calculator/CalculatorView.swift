@@ -14,6 +14,9 @@ struct CalculatorView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack {
+                if let description = viewModel.errorDescription {
+                    ErrorView(errorDescription: description)
+                }
                 Spacer()
                 HStack {
                     Spacer()
@@ -38,6 +41,20 @@ struct CalculatorView: View {
         let widthBase = min(geometrySize.width, geometrySize.height)
         let buttonWidth = ((widthBase - padding * 2) / 4) - spacing
         return min(buttonWidth, 120)
+    }
+}
+
+// TODO: Error localization
+struct ErrorView: View {
+    let errorDescription: String
+    var body: some View {
+        Group {
+            Text("⚠️ Error: \(errorDescription) \nPress C to continue")
+                .padding()
+                .foregroundStyle(Colors.errorForeground)
+        }
+        .background(Colors.errorBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 25.0))
     }
 }
 

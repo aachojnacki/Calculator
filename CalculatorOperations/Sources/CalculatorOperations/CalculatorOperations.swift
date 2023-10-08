@@ -6,10 +6,6 @@ public protocol CalculatorOperation {
     func calculate(_ args:[Float]) async throws -> Float
 }
 
-public enum CalculationError: Error {
-    case zeroDivision
-}
-
 extension CalculatorOperation {
     func checkArgsCount(argsCount: Int) {
         assert(argsCount == numberOfArguments, "Wrong args number passed to calculation")
@@ -60,7 +56,7 @@ public class Divide: CalculatorOperation {
     
     public func calculate(_ args: [Float]) async throws -> Float {
         checkArgsCount(argsCount: args.count)
-        guard args[1] != 0 else { throw CalculationError.zeroDivision }
+        guard args[1] != 0 else { throw CalculatorError.zeroDivision }
         return args[0] / args[1]
     }
 }

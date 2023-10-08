@@ -32,7 +32,7 @@ class CalculatorViewModel: ObservableObject {
     // a variable representing if the currently displayed input has already been collected into arguments table
     private var argumentCollected = false
     
-    let errorSubject = PassthroughSubject<CalculationError, Never>()
+    let errorSubject = PassthroughSubject<CalculatorError, Never>()
     @Published private var currentOperation: CalculatorOperation?
     @Published var displayText = "0"
     @Published var operations: [CalculatorOperation] = [Sine(), Cosine(), Add(), Subtract(), Multiply(), Divide()]
@@ -61,9 +61,24 @@ class CalculatorViewModel: ObservableObject {
             handleAction(action: action)
         }
         .store(in: &cancellables)
+        
+        errorSubject
+            .map { $0.description }
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$errorDescription)
+        
+        errorSubject
+            .map { _ in "Err"}
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$displayText)
     }
     
     func handleAction(action: CalculatorButtonViewModel.Action) {
+        // if an error occured, only accept clear action
+        if errorDescription != nil {
+            guard case .clear = action else { return }
+        }
+        
         switch action {
         case .operation(let operation):
             calculate()
@@ -97,6 +112,7 @@ class CalculatorViewModel: ObservableObject {
     
     private func clear() {
         displayText = "0"
+        errorDescription = nil
         currentOperation = nil
         argumentCollected = false
         calculationArguments = []
@@ -118,10 +134,10 @@ class CalculatorViewModel: ObservableObject {
                         argumentCollected = true
                     }
                 } catch {
-                    if let error = error as? CalculationError {
+                    if let error = error as? CalculatorError {
                         errorSubject.send(error)
                     } else {
-                        assertionFailure("The error should have CalculationError type")
+                        assertionFailure("The error should have CalculatorError type")
                     }
                 }
             }
