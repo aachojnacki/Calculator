@@ -8,9 +8,13 @@
 import SwiftUI
 
 struct CalculatorView: View {
+    
     let padding: CGFloat = 10
     let spacing: CGFloat = 10
+    let displayHeight: CGFloat = 60
+    
     @StateObject var viewModel: CalculatorViewModel
+    
     var body: some View {
         GeometryReader { geometry in
             VStack {
@@ -20,8 +24,18 @@ struct CalculatorView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    Text(viewModel.displayText)
-                        .font(.system(size: 50))
+                    if !viewModel.isCalculating {
+                        Text(viewModel.displayText)
+                            .font(.system(size: 50))
+                            .foregroundColor(Colors.foreground)
+                            .frame(maxHeight: displayHeight)
+                            .padding(.trailing, padding)
+                    } else {
+                        ProgressView()
+                            .frame(maxHeight: displayHeight, alignment: .center)
+                            .progressViewStyle(CircularProgressViewStyle(tint: Colors.foreground))
+                            .padding(.trailing, padding)
+                    }
                 }
                 VStack(spacing: spacing) {
                     ForEach(viewModel.buttonsMatrix, id: \.self) { row in
@@ -33,8 +47,9 @@ struct CalculatorView: View {
                     }
                 }
             }
-            .padding(padding)
         }
+        .background(Colors.background)
+        .padding(.vertical, padding)
     }
     
     func buttonSize(forGeometrySize geometrySize: CGSize) -> CGFloat {
@@ -52,6 +67,7 @@ struct ErrorView: View {
             Text("⚠️ Error: \(errorDescription) \nPress C to continue")
                 .padding()
                 .foregroundStyle(Colors.errorForeground)
+                .minimumScaleFactor(0.5)
         }
         .background(Colors.errorBackground)
         .clipShape(RoundedRectangle(cornerRadius: 25.0))

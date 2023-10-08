@@ -84,3 +84,22 @@ public class Cosine: CalculatorOperation {
         return cos(args[0])
     }
 }
+
+public class BTCtoUSD: CalculatorOperation {
+    public let numberOfArguments = 1
+    public let name = "₿"
+    let priceProvider: BitcoinPriceProviderProtocol
+    
+    public func calculate(_ args: [Float]) async throws -> Float {
+        do {
+            let price = try await priceProvider.getBitcoinPrice()
+            return price * args[0]
+        } catch {
+            throw CalculatorError.connectionFailure
+        }
+    }
+    
+    public init(priceProvider: BitcoinPriceProviderProtocol) {
+        self.priceProvider = priceProvider
+    }
+}

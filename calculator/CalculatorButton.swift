@@ -25,11 +25,11 @@ struct CalculatorButton: View {
     var backgroundColor: Color {
         switch viewModel.mode {
         case .operation, .clear:
-            return .cyan
+            return Colors.operationButton
         case .symbol:
-            return .yellow
+            return Colors.inputButton
         case .result:
-            return .yellow
+            return Colors.inputButton
         case .empty:
             return .clear
         }

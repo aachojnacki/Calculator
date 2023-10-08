@@ -35,7 +35,7 @@ class CalculatorViewModel: ObservableObject {
     let errorSubject = PassthroughSubject<CalculatorError, Never>()
     @Published private var currentOperation: CalculatorOperation?
     @Published var displayText = "0"
-    @Published var operations: [CalculatorOperation] = [Sine(), Cosine(), Add(), Subtract(), Multiply(), Divide()]
+    @Published var operations: [CalculatorOperation] = [Sine(), Cosine(), Add(), Subtract(), Multiply(), Divide(), BTCtoUSD(priceProvider: BitcoinPriceProvider())]
     @Published var buttonsMatrix: [[CalculatorButtonViewModel]] = [[]]
     @Published var errorDescription: String?
     @Published var isCalculating = false
@@ -72,10 +72,16 @@ class CalculatorViewModel: ObservableObject {
             .map { _ in "Err"}
             .receive(on: DispatchQueue.main)
             .assign(to: &$displayText)
+        
+        errorSubject
+            .map { _ in false }
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$isCalculating)
     }
     
     func handleAction(action: CalculatorButtonViewModel.Action) {
         // if an error occured, only accept clear action
+        guard !isCalculating else { return }
         if errorDescription != nil {
             guard case .clear = action else { return }
         }

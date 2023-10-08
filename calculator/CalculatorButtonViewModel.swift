@@ -19,6 +19,7 @@ class CalculatorButtonViewModel: ObservableObject, Identifiable {
     }
     
     @Published var text: String
+    @Published var isSelected = false
     let mode: Action
     let buttonAction = PassthroughSubject<Action, Never>()
     var cancellables = Set<AnyCancellable>()

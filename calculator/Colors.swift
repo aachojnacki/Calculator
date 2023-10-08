@@ -9,15 +9,12 @@ import Foundation
 import SwiftUI
 
 enum Colors {
-    static let errorBackground = Color.red
-    static let errorForeground = Color.white
-    /*
-     static let buttonFontColor
-     static let inputButtonColor
-     static let operationButtonColor
-     static let operationButtonSelectedColor
-     static let operationButtonSelectedFontColor
-     static let primaryForegroundColor
-     static let primaryBackgroundColor
-     */
+    static let errorBackground = Color(.errorBackground)
+    static let errorForeground = Color(.errorForeground)
+    static let buttonForeground = Color(.buttonForeground)
+    static let inputButton = Color(.inputButton)
+    static let operationButton = Color(.operationButton)
+    static let operationButtonSelected = Color(.operationButtonSelected)
+    static let foreground = Color(.foreground)
+    static let background = Color(.background)
 }
