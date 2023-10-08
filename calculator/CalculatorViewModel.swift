@@ -38,6 +38,7 @@ class CalculatorViewModel: ObservableObject {
     @Published var operations: [CalculatorOperation] = [Sine(), Cosine(), Add(), Subtract(), Multiply(), Divide()]
     @Published var buttonsMatrix: [[CalculatorButtonViewModel]] = [[]]
     @Published var errorDescription: String?
+    @Published var isCalculating = false
     
     init() {
         // setup bindings
@@ -81,8 +82,14 @@ class CalculatorViewModel: ObservableObject {
         
         switch action {
         case .operation(let operation):
-            calculate()
-            currentOperation = operation
+            Task {
+                await calculate()
+                await MainActor.run { currentOperation = operation }
+                if currentOperation?.numberOfArguments == 1 {
+                    await calculate()
+                    await MainActor.run { currentOperation = nil }
+                }
+            }
         case .clear:
             clear()
         case .symbol(let char):
@@ -103,8 +110,12 @@ class CalculatorViewModel: ObservableObject {
             }
             displayText += String(char)
         case .result:
-            calculate()
-            currentOperation = nil
+            Task {
+                await calculate()
+                await MainActor.run {
+                    currentOperation = nil
+                }
+            }
         case .empty:
             break
         }
@@ -118,27 +129,27 @@ class CalculatorViewModel: ObservableObject {
         calculationArguments = []
     }
     
-    private func calculate() {
+    private func calculate() async {
         if !argumentCollected {
             calculationArguments.append(Float(displayText) ?? 0)
             argumentCollected = true
         }
         guard let currentOperation else { return }
         if currentOperation.numberOfArguments == calculationArguments.count {
-            Task {
-                do {
-                    let result = try await currentOperation.calculate(calculationArguments)
-                    await MainActor.run {
-                        displayText = String(result)
-                        calculationArguments = [result]
-                        argumentCollected = true
-                    }
-                } catch {
-                    if let error = error as? CalculatorError {
-                        errorSubject.send(error)
-                    } else {
-                        assertionFailure("The error should have CalculatorError type")
-                    }
+            do {
+                await MainActor.run { isCalculating = true }
+                let result = try await currentOperation.calculate(calculationArguments)
+                await MainActor.run {
+                    isCalculating = false
+                    displayText = String(result)
+                    calculationArguments = [result]
+                    argumentCollected = true
+                }
+            } catch {
+                if let error = error as? CalculatorError {
+                    errorSubject.send(error)
+                } else {
+                    assertionFailure("The error should have CalculatorError type")
                 }
             }
         }
