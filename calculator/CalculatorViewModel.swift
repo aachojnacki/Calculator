@@ -29,13 +29,15 @@ class CalculatorViewModel: ObservableObject {
     private let calculatorAction = PassthroughSubject<CalculatorButtonViewModel.Action, Never>()
     private var calculationArguments: [Float] = []
     
-    // a variable representing if the currently displayed input has already been collected into arguments
+    // a variable representing if the currently displayed input has already been collected into arguments table
     private var argumentCollected = false
     
+    let errorSubject = PassthroughSubject<CalculationError, Never>()
     @Published private var currentOperation: CalculatorOperation?
     @Published var displayText = "0"
-    @Published var operations: [CalculatorOperation] = [AddOperation()]
+    @Published var operations: [CalculatorOperation] = [Sine(), Cosine(), Add(), Subtract(), Multiply(), Divide()]
     @Published var buttonsMatrix: [[CalculatorButtonViewModel]] = [[]]
+    @Published var errorDescription: String?
     
     init() {
         // setup bindings
@@ -56,37 +58,41 @@ class CalculatorViewModel: ObservableObject {
         
         calculatorAction.sink { [weak self] action in
             guard let self else { return }
-            switch action {
-            case .operation(let operation):
-                calculate()
-                currentOperation = operation
-            case .clear:
-                clear()
-            case .symbol(let char):
-                if displayText == "0" && char != Self.decimalPoint {
-                    displayText = ""
-                }
-                if argumentCollected {
-                    displayText = ""
-                    argumentCollected = false
-                    
-                    // if no operation is currently selected, clean the arguments table
-                    if currentOperation == nil && !calculationArguments.isEmpty {
-                        calculationArguments = []
-                    }
-                }
-                if displayText.contains(Self.decimalPoint), char == Self.decimalPoint {
-                    break
-                }
-                displayText += String(char)
-            case .result:
-                calculate()
-                currentOperation = nil
-            case .empty:
-                break
-            }
+            handleAction(action: action)
         }
         .store(in: &cancellables)
+    }
+    
+    func handleAction(action: CalculatorButtonViewModel.Action) {
+        switch action {
+        case .operation(let operation):
+            calculate()
+            currentOperation = operation
+        case .clear:
+            clear()
+        case .symbol(let char):
+            if displayText == "0" && char != Self.decimalPoint {
+                displayText = ""
+            }
+            if argumentCollected {
+                displayText = ""
+                argumentCollected = false
+                
+                // if no operation is currently selected, clean the arguments table
+                if currentOperation == nil && !calculationArguments.isEmpty {
+                    calculationArguments = []
+                }
+            }
+            if displayText.contains(Self.decimalPoint), char == Self.decimalPoint {
+                break
+            }
+            displayText += String(char)
+        case .result:
+            calculate()
+            currentOperation = nil
+        case .empty:
+            break
+        }
     }
     
     private func clear() {
@@ -104,11 +110,19 @@ class CalculatorViewModel: ObservableObject {
         guard let currentOperation else { return }
         if currentOperation.numberOfArguments == calculationArguments.count {
             Task {
-                let result = try! await currentOperation.calculate(calculationArguments)
-                await MainActor.run {
-                    displayText = String(result)
-                    calculationArguments = [result]
-                    argumentCollected = true
+                do {
+                    let result = try await currentOperation.calculate(calculationArguments)
+                    await MainActor.run {
+                        displayText = String(result)
+                        calculationArguments = [result]
+                        argumentCollected = true
+                    }
+                } catch {
+                    if let error = error as? CalculationError {
+                        errorSubject.send(error)
+                    } else {
+                        assertionFailure("The error should have CalculationError type")
+                    }
                 }
             }
         }
