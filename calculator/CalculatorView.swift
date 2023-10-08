@@ -29,12 +29,12 @@ struct CalculatorView: View {
                             .font(.system(size: 50))
                             .foregroundColor(Colors.foreground)
                             .frame(maxHeight: displayHeight)
-                            .padding(.trailing, padding)
+                            .padding(.trailing, textViewPadding(forGeometrySize: geometry.size))
                     } else {
                         ProgressView()
                             .frame(maxHeight: displayHeight, alignment: .center)
                             .progressViewStyle(CircularProgressViewStyle(tint: Colors.foreground))
-                            .padding(.trailing, padding)
+                            .padding(.trailing, textViewPadding(forGeometrySize: geometry.size))
                     }
                 }
                 VStack(spacing: spacing) {
@@ -56,6 +56,12 @@ struct CalculatorView: View {
         let widthBase = min(geometrySize.width, geometrySize.height)
         let buttonWidth = ((widthBase - padding * 2) / 4) - spacing
         return min(buttonWidth, 120)
+    }
+    
+    func textViewPadding(forGeometrySize geometrySize: CGSize) -> CGFloat {
+        let widthBase = min(geometrySize.width, geometrySize.height)
+        let buttonWidth = buttonSize(forGeometrySize: geometrySize)
+        return (widthBase - (buttonWidth + spacing) * 4) / 2   
     }
 }
 
