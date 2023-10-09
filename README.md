@@ -13,9 +13,9 @@ The `BitcoinPriceProvider` protocol / implementation handles the Bitcoin operati
 
 `CalculatorViewModel` is responsible for setting up the buttons' view models based on given operations, so this gives the code a lot of flexibility in changing the operations that are visible for the user, as well as defining new ones. This class is also responsible for most of the calculator logic. It currently supports 1 and 2 argument operators, and as mentioned before up to 7 operations. I feel like the logic could be cleaned up a little, but I tried to be as clean as possible given the time constraints that I had. Maybe it should also be concidered to divide the VM into some smaller pieces.
 
-The app supports dark and light mode color schemes. The colors are defined in Assets and accessed through `Colors`enum. Only portrait mode is supported for now. I felt that a proper landscape mode would require a lot more work, and some extra operations for the user (like in the iPhone's calculator)
+The app supports dark and light mode color schemes. The colors are defined in Assets and accessed through `Colors`enum. Only portrait mode is supported for now. I felt that a proper landscape mode would require a lot more work, and that it should provide some extra operations for the user (like in the iPhone's calculator)
  
-Error handling has also been implemented, the errors come from calculator's operations and are displayed in a user-friendly way on a banner at the top of the screen. Also the display goes to an "Err" state - to clear the error user is asked to press the "C" button, which I thought was a smart way to imitate how real caltulator work.
+Error handling has also been implemented, the errors come from calculator's operations and are displayed in a user-friendly way on a banner at the top of the screen. Also the display goes to an "Err" state - to clear the error user is asked to press the "C" button, which I thought was a smart way to imitate how real caltulators work.
 
 
 ## Things I would like to do next if I had more time:
