@@ -137,7 +137,11 @@ class CalculatorViewModel: ObservableObject {
     
     private func calculate() async {
         if !argumentCollected {
-            calculationArguments.append(Float(displayText) ?? 0)
+            // quick fix for locales that use decimal point other than ".". This should be done properly with a number formatter
+            let floatString = displayText.replacingOccurrences(of: String(Self.decimalPoint), with: ".")
+            let argument = Float(floatString)
+            assert(argument != nil, "argument collection failure")
+            calculationArguments.append(argument ?? 0)
             argumentCollected = true
         }
         guard let currentOperation else { return }
