@@ -77,6 +77,14 @@ class CalculatorViewModel: ObservableObject {
             .map { _ in false }
             .receive(on: DispatchQueue.main)
             .assign(to: &$isCalculating)
+        
+        $currentOperation
+            .sink { [weak self] operation in
+                if operation == nil {
+                    self?.deselectButtons()
+                }
+            }
+            .store(in: &cancellables)
     }
     
     func handleAction(action: CalculatorButtonViewModel.Action) {
@@ -88,6 +96,7 @@ class CalculatorViewModel: ObservableObject {
         
         switch action {
         case .operation(let operation):
+            deselectButtons()
             Task {
                 await calculate()
                 await MainActor.run { currentOperation = operation }
@@ -162,6 +171,12 @@ class CalculatorViewModel: ObservableObject {
                     assertionFailure("The error should have CalculatorError type")
                 }
             }
+        }
+    }
+    
+    private func deselectButtons() {
+        buttonsMatrix.flatMap { $0 }.forEach { button in
+            button.isSelected = false
         }
     }
     

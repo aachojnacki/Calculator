@@ -8,31 +8,40 @@
 import SwiftUI
 
 struct CalculatorButton: View {
+    @State private var isPressed = false
     @ObservedObject var viewModel: CalculatorButtonViewModel
     let buttonWidth: CGFloat
     var body: some View {
-        Text(viewModel.text)
-            .font(.system(size: 30))
-            .foregroundStyle(.white)
-            .frame(width: buttonWidth, height: buttonWidth)
-            .background(content: { Circle()
-                .foregroundStyle(backgroundColor)})
-            .onTapGesture {
-                viewModel.buttonPressed()
-            }
+        Button(action: { viewModel.buttonPressed() }, label: {
+            Text(viewModel.text)
+                .font(.system(size: 30))
+                .foregroundStyle(.white)
+                .frame(width: buttonWidth, height: buttonWidth)
+                .background(content: {
+                    Circle()
+                        .foregroundStyle(backgroundColor)
+                })
+        })
     }
     
     var backgroundColor: Color {
+        let color: Color
         switch viewModel.mode {
         case .operation, .clear:
-            return Colors.operationButton
+            if viewModel.isSelected {
+                color = Colors.operationButtonSelected
+            } else {
+                color = Colors.operationButton
+            }
         case .symbol:
-            return Colors.inputButton
+            color = Colors.inputButton
         case .result:
-            return Colors.inputButton
+            color = Colors.inputButton
         case .empty:
             return .clear
         }
+        
+        return color.opacity(isPressed ? 0.5 : 1)
     }
 }
 

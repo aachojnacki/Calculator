@@ -42,6 +42,9 @@ class CalculatorButtonViewModel: ObservableObject, Identifiable {
     
     func buttonPressed() {
         buttonAction.send(mode)
+        if case .operation = mode {
+            isSelected = true
+        }
     }
 }
 
